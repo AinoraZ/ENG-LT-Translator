@@ -1,9 +1,11 @@
+from pynput.keyboard import Key, Listener
 import os
 import requests
 import json
 import copy
 import kivy
 from random import randint
+from pynput.keyboard import Key, Controller, Listener
 
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
@@ -34,6 +36,8 @@ import itertools
 import threading
 import time
 import sys
+from kivy.uix.behaviors import FocusBehavior
+from pynput.keyboard import Key, Controller, Listener
 
 kivy.require('1.9.1')  # replace with your current kivy version !
 
@@ -236,7 +240,6 @@ class TranslatedWidget(Screen):
         a.start()
 
 
-
 class TranslatedWord(BoxLayout, ListItemButton):
     def __init__(self, word, count, **kwargs):
         self.word = word
@@ -264,9 +267,11 @@ class TranslatedWord(BoxLayout, ListItemButton):
 
         self.input_word = TextInput(text=word["word"].capitalize())
         self.add_widget(self.input_word)
+        self.input_word.write_tab = False
 
         self.translation = TextInput(text=self.fix().capitalize())
         self.add_widget(self.translation)
+        self.translation.write_tab = False
 
         btn1 = Button(text="Next")
         btn1.bind(on_press=self.re_translate)
@@ -277,6 +282,7 @@ class TranslatedWord(BoxLayout, ListItemButton):
         self.add_widget(btn2)
 
         self.checked_all = False
+        self.focus()
 
     def fix(self):
         if self.word["matches"].__len__() > 0:
@@ -319,12 +325,16 @@ class TranslatedWord(BoxLayout, ListItemButton):
         self.match = 0
         self.translation.text = self.fix()
 
+    def focus(self):
+        self.input_word.focus = True
+
 
 class WordShower(Screen):
     def __init__(self, **kwargs):
         super(WordShower, self).__init__(**kwargs)
         Clock.schedule_interval(self.check_update, 1 / 30.)
         self.update()
+        self.switch = False
 
     def update(self):
         self.clear_widgets()
@@ -335,8 +345,10 @@ class WordShower(Screen):
         layout = BoxLayout(orientation="vertical", padding=[100,50,100,50])
         self.add_widget(layout)
 
-        self.word = Label(text="", font_size=100, size_hint=(1, 0.5))
-        self.translation = TextInput(text="", font_size=50, size_hint=(1, 0.5))
+        self.word = Label(text="", font_size=40, size_hint=(1, 0.5))
+        self.translation = TextInput(text="", font_size=30, size_hint=(1, 0.2))
+        self.translation.multiline = False
+        self.translation.write_tab = False
         self.translation.padding_x = [self.translation.width / 2, self.translation.width / 2]
         self.current_text = ""
         self.match = 0
@@ -351,22 +363,29 @@ class WordShower(Screen):
         anchor.anchor_y = "top"
         anchor.add_widget(self.top_widget())
         self.add_widget(anchor)
+        self.translation.focus = True
 
     def check_update(self, instance):
-        if self.current_text != self.translation.text:
-            self.current_text = self.translation.text
-            if self.translation.foreground_color != (0, 0, 0, 1):
-                self.translation.foreground_color = (0, 0, 0, 1)
+        if not self.switch:
+            if self.current_text != self.translation.text:
+                self.current_text = self.translation.text
+                if self.translation.foreground_color != (0, 0, 0, 1):
+                    self.translation.foreground_color = (0, 0, 0, 1)
 
     def next_word(self, instance=""):
+        if self.perCopy.__len__() <= 1:
+            print("Sorry, no words")
+            self.word.text = "[No Translations]"
+            return None
         temp = randint(0, self.perCopy.__len__() - 1)
         while temp == self.match:
             temp = randint(0, self.perCopy.__len__() - 1)
         self.match = temp
-        self.word.text = self.perCopy[self.match]["word"].lower().capitalize()
-        self.match_word = self.fix()
+        self.word.text = self.fix()
+        self.match_word = self.perCopy[self.match]["word"].lower().capitalize()
         self.translation.text = ""
         self.translation.foreground_color = (0, 0, 0, 1)
+        self.translation.focus = True
 
     def fix(self):
         if self.perCopy[self.match]["matches"].__len__() > 0:
@@ -400,15 +419,39 @@ class WordShower(Screen):
 
         return menu_bar
 
+    def start_switch(self):
+        self.switch = True
+        switch = threading.Thread(target=self._sleep_switch)
+        switch.daemon = True
+        switch.start()
+
+    def start_focus_offset(self):
+        focus_offset = threading.Thread(target=self._set_focus)
+        focus_offset.daemon = True
+        focus_offset.start()
+
     def show(self, instance):
         self.translation.text = self.match_word
-        self.translation.foreground_color = (0, 0, 0, 1)
+        self.translation.foreground_color = (0.5, 0.5, 0, 1)
+        self.start_switch()
 
-    def check(self, instance):
-        if self.translation.text == self.match_word:
-            self.translation.foreground_color = (0, 1, 0, 1)
+    def check(self, instance=""):
+        print(self.translation.text.strip().lower())
+        if self.translation.text.strip().lower() == self.match_word.strip().lower():
+            self.translation.foreground_color = (0, 0.8, 0, 1)
+            self.start_switch()
         else:
             self.translation.foreground_color = (1, 0, 0, 1)
+            self.start_focus_offset()
+
+    def _set_focus(self):
+        time.sleep(0.2)
+        self.translation.focus = True
+
+    def _sleep_switch(self):
+        time.sleep(2)
+        self.switch = False
+        self.next_word()
 
     def switch_screen(self, instance):
         sm.transition.direction = "right"
@@ -442,7 +485,7 @@ class MainWidget(Screen):
         content = BoxLayout(orientation='vertical', spacing=5)
 
         # TextBox
-        self.input_english = TextInput(text='Paste\nyour\nwords\nlike\nthis', size_hint=(0.8, 0.9),
+        self.input_english = TextInput(text='Paste\nyour\nwords\nlike this', size_hint=(0.8, 0.9),
                                      pos_hint={'center_x': 0.5})
         content.add_widget(self.input_english)
 
@@ -469,6 +512,7 @@ class MainWidget(Screen):
         word_widget.update()
         sm.transition.direction = "left"
         sm.current = "words"
+        word_widget.translation.focus = True
 
     def switch_screen(self, instance):
         translated_widget.update()
@@ -535,6 +579,29 @@ sm.add_widget(translated_widget)
 word_widget = WordShower(name="words")
 sm.add_widget(word_widget)
 
+def on_press(key):
+    if sm.current == "words":
+        if key == Key.enter:
+            print("enter pressed")
+            word_widget.check()
+            d = threading.Thread(target = delay)
+            d.daemon = True
+            d.start()
+
+def delay():
+    time.sleep(0.2)
+    if not word_widget.translation.text.strip().lower() == word_widget.match_word.strip().lower():
+        word_widget.translation.focus = True
+
+# Collect events until released
+class Listen():
+  def __init__(self):
+        with Listener(on_press=on_press) as listener:
+            listener.join()
+
+t = threading.Thread(target=Listen)
+t.daemon = True
+t.start()
 
 class MainApp(App):
     def build(self):
