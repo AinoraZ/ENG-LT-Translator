@@ -140,3 +140,5 @@ $RECYCLE.BIN/
 *.xml
 *.idea/
 *.json
+json/words.json
+*.json
