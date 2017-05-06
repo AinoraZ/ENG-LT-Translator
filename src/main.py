@@ -46,13 +46,13 @@ count = 0
 class Translate(object):
     def __init__(self):
         self.a = []
-        with open(os.getcwd() + "/json/words.json") as file:
+        with open("../json/words.json") as file:
             self.perCopy = json.load(file)
 
     def clear(self):
-        with open(os.getcwd() + "/json/wordsBack.json") as file:
+        with open("../json/wordsBack.json") as file:
             self.per = json.load(file)
-        with open(os.getcwd() + "/json/words.json", 'w') as json_data:
+        with open("../json/words.json", 'w') as json_data:
             json_data.write(
                 json.dumps(self.per, sort_keys=True, indent=4, separators=(',', ': '))
             )
@@ -64,7 +64,7 @@ class Translate(object):
         return r.json()["matches"]
 
     def open_translation(self):
-        with open(os.getcwd() + "/json/words.json") as file:
+        with open("../json/words.json") as file:
             return json.load(file)
 
     def save_file(self):
@@ -79,7 +79,7 @@ class TranslatedWidget(Screen):
     def update(self):
         self.clear_widgets()
 
-        with open(os.getcwd() + "/json/words.json") as file:
+        with open("../json/words.json") as file:
             self.perCopy = json.load(file)
 
         anchor = AnchorLayout()
@@ -148,10 +148,10 @@ class TranslatedWidget(Screen):
         sm.current = "main"
 
     def add(self, instance):
-        with open(os.getcwd() + "/json/wordsBack.json") as file:
+        with open("../json/wordsBack.json") as file:
             self.per = json.load(file)
         self.perCopy["words"].append(self.per["words"][0])
-        with open(os.getcwd() + "/json/words.json", 'w') as json_data:
+        with open("../json/words.json", 'w') as json_data:
                 json_data.write(
                     json.dumps(self.perCopy, sort_keys=True, indent=4, separators=(',', ': '))
                 )
@@ -162,13 +162,13 @@ class TranslatedWidget(Screen):
 
     def save_json(self, instance):
         self.clear()
-        with open(os.getcwd() + "/json/words.json") as file:
+        with open("../json/words.json") as file:
             self.perCopy = json.load(file)
         for obj in self.word_objs:
             temp = obj.save_new()
             if temp != None:
                 self.perCopy["words"].append(temp)
-        with open(os.getcwd() + "/json/words.json", 'w') as json_data:
+        with open("../json/words.json", 'w') as json_data:
             json_data.write(
                 json.dumps(self.perCopy, sort_keys=True, indent=4, separators=(',', ': '))
             )
@@ -185,10 +185,10 @@ class TranslatedWidget(Screen):
         Clock.schedule_once(self.save_json, 0.05)
 
     def clear(self):
-        with open(os.getcwd() + "/json/wordsBack.json") as file:
+        with open("../json/wordsBack.json") as file:
             self.per = json.load(file)
         del self.per["words"][0]
-        with open(os.getcwd() + "/json/words.json", 'w') as json_data:
+        with open("../json/words.json", 'w') as json_data:
             json_data.write(
                 json.dumps(self.per, sort_keys=True, indent=4, separators=(',', ': '))
             )
@@ -333,12 +333,14 @@ class WordShower(Screen):
     def __init__(self, **kwargs):
         super(WordShower, self).__init__(**kwargs)
         Clock.schedule_interval(self.check_update, 1 / 30.)
-        self.update()
         self.switch = False
+        self.available_list = []
+        self.temp = 0
+        self.update()
 
     def update(self):
         self.clear_widgets()
-        with open(os.getcwd() + "/json/words.json") as file:
+        with open("../json/words.json") as file:
             self.perCopy = json.load(file)
             self.perCopy = self.perCopy["words"]
 
@@ -364,6 +366,7 @@ class WordShower(Screen):
         anchor.add_widget(self.top_widget())
         self.add_widget(anchor)
         self.translation.focus = True
+        self.make_list()
 
     def check_update(self, instance):
         if not self.switch:
@@ -372,15 +375,28 @@ class WordShower(Screen):
                 if self.translation.foreground_color != (0, 0, 0, 1):
                     self.translation.foreground_color = (0, 0, 0, 1)
 
+    def make_list(self):
+        self.available_list = []
+        count = 0
+        for x in self.perCopy:
+            self.available_list.append(count)
+            count += 1
+
     def next_word(self, instance=""):
-        if self.perCopy.__len__() <= 1:
+        if self.available_list.__len__() == 0:
             print("Sorry, no words")
             self.word.text = "[No Translations]"
             return None
-        temp = randint(0, self.perCopy.__len__() - 1)
-        while temp == self.match:
-            temp = randint(0, self.perCopy.__len__() - 1)
-        self.match = temp
+        if self.available_list.__len__() - 1 != 0:
+            self.temp = randint(0, self.available_list.__len__() - 1)
+            while self.temp == self.match:
+                self.temp = randint(0, self.available_list.__len__() - 1)
+            self.match = self.available_list[self.temp]
+        else:
+            self.match = self.available_list[0]
+        if self.available_list.__len__() == 1:
+            self.make_list()
+        print(self.match)
         self.word.text = self.fix()
         self.match_word = self.perCopy[self.match]["word"].lower().capitalize()
         self.translation.text = ""
@@ -438,7 +454,8 @@ class WordShower(Screen):
     def check(self, instance=""):
         print(self.translation.text.strip().lower())
         if self.translation.text.strip().lower() == self.match_word.strip().lower():
-            self.translation.foreground_color = (0, 0.8, 0, 1)
+            self.translation.foreground_color = (0, 0.6, 0, 1)
+            del self.available_list[self.temp]
             self.start_switch()
         else:
             self.translation.foreground_color = (1, 0, 0, 1)
@@ -485,7 +502,8 @@ class MainWidget(Screen):
         content = BoxLayout(orientation='vertical', spacing=5)
 
         # TextBox
-        self.input_english = TextInput(text='Paste\nyour\nwords\nlike this', size_hint=(0.8, 0.9),
+        f = open("../json/words.txt", "r")
+        self.input_english = TextInput(text=f.read(), size_hint=(0.8, 0.9),
                                      pos_hint={'center_x': 0.5})
         content.add_widget(self.input_english)
 
@@ -526,14 +544,14 @@ class MainWidget(Screen):
         self.popup.dismiss()
 
     def save(self, instance):   # Save input
-        with open(os.getcwd() + '/words.txt', 'w') as data:
+        with open('../json/words.txt', 'w') as data:
             data.write(self.input_english.text)
         self.popup.dismiss()
 
     def translate(self, instance):
         Translate().clear()
         self.read_file()
-        with open(os.getcwd() + "/json/words.json") as file:
+        with open("../json/words.json") as file:
             self.perCopy = json.load(file)
         template = copy.copy(self.perCopy["words"][0])
         del self.perCopy["words"][0]
@@ -547,7 +565,7 @@ class MainWidget(Screen):
         self.progress_pop.open()
 
     def read_file(self):
-        f = open(os.getcwd() + "/words.txt", "r")
+        f = open("../json/words.txt", "r")
         self.a = []
         for line in f:
             self.a.append(line.strip('\n'))
@@ -561,7 +579,7 @@ class MainWidget(Screen):
         count += 1
         self.pb.value += 1
         if self.a.__len__() == count:
-            with open(os.getcwd() + "/json/words.json", 'w') as json_data:
+            with open("../json/words.json", 'w') as json_data:
                 json_data.write(
                     json.dumps(self.perCopy, sort_keys=True, indent=4, separators=(',', ': '))
                 )

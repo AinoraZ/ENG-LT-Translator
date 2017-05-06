@@ -2,5 +2,4 @@ Paste
 your
 words
 like this
-Happy
-Today
+I like this
