@@ -35,7 +35,7 @@ In the project folder do:
 
 `pip install kivy`  
 `pip install pyinstaller`  
-_If your are not running from project folder: Open Trait.spec or Trait_single.spec and input project location in pathex_
+_If your are not running from project folder: Open Trait.spec or Trait_single.spec and input project location in pathex_  
 `pyinstaller Trait.spec` or `pyinstaller Trait_single.spec`  
 _The single spec compiles to a onefile executable. There are some speed and memory drawbacks to this (For instance, translated words are saved only for one session)_  
 
