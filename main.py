@@ -355,6 +355,7 @@ class WordShower(Screen):
         self.current_text = ""
         self.match = 0
         self.match_word = ""
+        self.make_list()
         self.next_word()
 
         layout.add_widget(self.word)
@@ -366,7 +367,6 @@ class WordShower(Screen):
         anchor.add_widget(self.top_widget())
         self.add_widget(anchor)
         self.translation.focus = True
-        self.make_list()
 
     def check_update(self, instance):
         if not self.switch:
