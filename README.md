@@ -3,7 +3,9 @@ A little application to easily translate and learn English words for Lithuanians
 
 This application lets people easily translate bulks of English words to Lithuanian and to learn them quickly.
 
-**The prime usage of this application is directed towards Lithuanian schools and their system of learning English.** 
+**The prime usage of this application is directed towards Lithuanian schools and their system of learning English.**
+
+**Usage is limited to 1000 words/day.**
 
 _Often times, many English words are given for students to learn. These words are then accounted by randomly asking ~20% of the words. Students are graded by how many words they managed to translate. While I did primarily call this app a Translator, it is more of a helper for students to learn these large amounts of words._
 
