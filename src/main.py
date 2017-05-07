@@ -27,11 +27,15 @@ import threading
 import time
 import sys
 from pynput.keyboard import Key, Listener
+from kivy.config import Config
+
+Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 
 kivy.require('1.9.1')  # replace with your current kivy version !
 
 count = 0
 sys.path.append(os.path.realpath('..'))
+
 
 
 def resource_path(relative_path):
@@ -115,6 +119,7 @@ class TranslatedWidget(Screen):
         menu_bar.add_widget(menu_view)
 
         menu_previous = ActionPrevious()
+        menu_previous.app_icon = resource_path('assets/Trait_hd_action.png')
         menu_previous.bind(on_press=self.switch_screen)
         menu_view.add_widget(menu_previous)
 
@@ -418,6 +423,7 @@ class WordShower(Screen):
         menu_bar.add_widget(menu_view)
 
         menu_previous = ActionPrevious()
+        menu_previous.app_icon = resource_path('assets/Trait_hd_action.png')
         menu_previous.bind(on_press=self.switch_screen)
         menu_view.add_widget(menu_previous)
 
@@ -627,6 +633,8 @@ t.start()
 
 class MainApp(App):
     def build(self):
+        self.title = "Trait"
+        self.icon = resource_path('assets/Trait_hd.png')
         return sm
 
 MainApp().run()

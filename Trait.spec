@@ -7,7 +7,7 @@ block_cipher = None
 a = Analysis(['src\\main.py'],
              pathex=['G:\\Programming Projects\\ENG-LT-Translator'],
              binaries=[],
-             datas=[('json', 'json')],
+             datas=[('json', 'json'), ('assets\\Trait_hd.png', 'assets'), ('assets\\Trait_hd_action.png', 'assets')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -24,7 +24,7 @@ exe = EXE(pyz,
           debug=False,
           strip=False,
           upx=True,
-          console=False , icon='Trait.ico')
+          console=False , icon='assets\\Trait.ico')
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
