@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(['src\\main.py'],
-             pathex=['G:\\Programming Projects\\ENG-LT-Translator'],
+             pathex=['.'],
              binaries=[],
              datas=[('json', 'json'), ('assets\\Trait_hd.png', 'assets'), ('assets\\Trait_hd_action.png', 'assets')],
              hiddenimports=[],

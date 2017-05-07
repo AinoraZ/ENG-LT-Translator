@@ -3,7 +3,9 @@ A little application to easily translate and learn English words for Lithuanians
 
 This application lets people easily translate bulks of English words to Lithuanian and to learn them quickly.
 
-**The prime usage of this application is directed towards Lithuanian schools and their system of learning English.** 
+**The prime usage of this application is directed towards Lithuanian schools and their system of learning English.**
+
+**Usage is limited to 1000 words/day by MyMemory api.**
 
 _Often times, many English words are given for students to learn. These words are then accounted by randomly asking ~20% of the words. Students are graded by how many words they managed to translate. While I did primarily call this app a Translator, it is more of a helper for students to learn these large amounts of words._
 
@@ -33,6 +35,7 @@ In the project folder do:
 
 `pip install kivy`  
 `pip install pyinstaller`  
+_If your are not running from project folder: Open Trait.spec or Trait_single.spec and input project location in pathex_
 `pyinstaller Trait.spec` or `pyinstaller Trait_single.spec`  
 _The single spec compiles to a onefile executable. There are some speed and memory drawbacks to this (For instance, translated words are saved only for one session)_  
 
@@ -41,4 +44,3 @@ _The single spec compiles to a onefile executable. There are some speed and memo
 ## Downloads
 
 **Coming soon**
-
