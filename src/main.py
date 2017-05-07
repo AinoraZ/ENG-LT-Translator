@@ -34,16 +34,26 @@ count = 0
 sys.path.append(os.path.realpath('..'))
 
 
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
 class Translate(object):
     def __init__(self):
         self.a = []
-        with open("json/words.json") as file:
+        with open(resource_path("json/words.json")) as file:
             self.perCopy = json.load(file)
 
     def clear(self):
-        with open("json/wordsBack.json") as file:
+        with open(resource_path("json/wordsBack.json")) as file:
             self.per = json.load(file)
-        with open("json/words.json", 'w') as json_data:
+        with open(resource_path("json/words.json"), 'w') as json_data:
             json_data.write(
                 json.dumps(self.per, sort_keys=True, indent=4, separators=(',', ': '))
             )
@@ -55,7 +65,7 @@ class Translate(object):
         return r.json()["matches"]
 
     def open_translation(self):
-        with open("json/words.json") as file:
+        with open(resource_path("json/words.json")) as file:
             return json.load(file)
 
     def save_file(self):
@@ -70,7 +80,7 @@ class TranslatedWidget(Screen):
     def update(self):
         self.clear_widgets()
 
-        with open("json/words.json") as file:
+        with open(resource_path("json/words.json")) as file:
             self.perCopy = json.load(file)
 
         anchor = AnchorLayout()
@@ -139,10 +149,10 @@ class TranslatedWidget(Screen):
         sm.current = "main"
 
     def add(self, instance):
-        with open("json/wordsBack.json") as file:
+        with open(resource_path("json/wordsBack.json")) as file:
             self.per = json.load(file)
         self.perCopy["words"].append(self.per["words"][0])
-        with open("json/words.json", 'w') as json_data:
+        with open(resource_path("json/words.json"), 'w') as json_data:
                 json_data.write(
                     json.dumps(self.perCopy, sort_keys=True, indent=4, separators=(',', ': '))
                 )
@@ -153,13 +163,13 @@ class TranslatedWidget(Screen):
 
     def save_json(self, instance):
         self.clear()
-        with open("json/words.json") as file:
+        with open(resource_path("json/words.json")) as file:
             self.perCopy = json.load(file)
         for obj in self.word_objs:
             temp = obj.save_new()
             if temp != None:
                 self.perCopy["words"].append(temp)
-        with open("json/words.json", 'w') as json_data:
+        with open(resource_path("json/words.json"), 'w') as json_data:
             json_data.write(
                 json.dumps(self.perCopy, sort_keys=True, indent=4, separators=(',', ': '))
             )
@@ -171,15 +181,14 @@ class TranslatedWidget(Screen):
                 if obj.check.active:
                     obj.remove()
 
-
     def clock_save(self, instance):
         Clock.schedule_once(self.save_json, 0.05)
 
     def clear(self):
-        with open("json/wordsBack.json") as file:
+        with open(resource_path("json/wordsBack.json")) as file:
             self.per = json.load(file)
         del self.per["words"][0]
-        with open("json/words.json", 'w') as json_data:
+        with open(resource_path("json/words.json"), 'w') as json_data:
             json_data.write(
                 json.dumps(self.per, sort_keys=True, indent=4, separators=(',', ': '))
             )
@@ -331,7 +340,7 @@ class WordShower(Screen):
 
     def update(self):
         self.clear_widgets()
-        with open("json/words.json") as file:
+        with open(resource_path("json/words.json")) as file:
             self.perCopy = json.load(file)
             self.perCopy = self.perCopy["words"]
 
@@ -346,6 +355,7 @@ class WordShower(Screen):
         self.current_text = ""
         self.match = 0
         self.match_word = ""
+        self.make_list()
         self.next_word()
 
         layout.add_widget(self.word)
@@ -357,7 +367,6 @@ class WordShower(Screen):
         anchor.add_widget(self.top_widget())
         self.add_widget(anchor)
         self.translation.focus = True
-        self.make_list()
 
     def check_update(self, instance):
         if not self.switch:
@@ -493,7 +502,7 @@ class MainWidget(Screen):
         content = BoxLayout(orientation='vertical', spacing=5)
 
         # TextBox
-        f = open("json/words.txt", "r")
+        f = open(resource_path("json/words.txt"), "r")
         self.input_english = TextInput(text=f.read(), size_hint=(0.8, 0.9),
                                      pos_hint={'center_x': 0.5})
         content.add_widget(self.input_english)
@@ -535,14 +544,14 @@ class MainWidget(Screen):
         self.popup.dismiss()
 
     def save(self, instance):   # Save input
-        with open('json/words.txt', 'w') as data:
+        with open(resource_path('json/words.txt'), 'w') as data:
             data.write(self.input_english.text)
         self.popup.dismiss()
 
     def translate(self, instance):
         Translate().clear()
         self.read_file()
-        with open("json/words.json") as file:
+        with open(resource_path("json/words.json")) as file:
             self.perCopy = json.load(file)
         template = copy.copy(self.perCopy["words"][0])
         del self.perCopy["words"][0]
@@ -556,7 +565,7 @@ class MainWidget(Screen):
         self.progress_pop.open()
 
     def read_file(self):
-        f = open("json/words.txt", "r")
+        f = open(resource_path("json/words.txt"), "r")
         self.a = []
         for line in f:
             self.a.append(line.strip('\n'))
@@ -570,7 +579,7 @@ class MainWidget(Screen):
         count += 1
         self.pb.value += 1
         if self.a.__len__() == count:
-            with open("json/words.json", 'w') as json_data:
+            with open(resource_path("json/words.json"), 'w') as json_data:
                 json_data.write(
                     json.dumps(self.perCopy, sort_keys=True, indent=4, separators=(',', ': '))
                 )
