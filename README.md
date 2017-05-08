@@ -33,7 +33,7 @@ Usage is simple:
 I've included the .spec files. You can compile this project by using pyinstaller.
 In the project folder do:
 
-`pip install kivy`  
+**Install kivy**: https://kivy.org/docs/installation/installation.html  
 `pip install pyinstaller`  
 _If your are not running from project folder: Open Trait.spec or Trait_single.spec and input project location in pathex_  
 `pyinstaller Trait.spec` or `pyinstaller Trait_single.spec`  
