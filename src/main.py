@@ -30,6 +30,7 @@ from pynput.keyboard import Key, Listener
 from kivy.config import Config
 
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
+Config.set('graphics', 'multisamples', '0')
 
 kivy.require('1.9.1')  # replace with your current kivy version !
 
